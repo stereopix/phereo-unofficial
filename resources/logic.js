@@ -8,7 +8,7 @@ let category = "latestuploads";
 if (window.location.protocol == "http:") window.location = "https://" + window.location.href.substr(7);
 
 function on_phereo_json_received () {
-  if (thumbs) {
+  if (thumbs && this.status == 200) {
     json = JSON.parse(this.responseText);
     media = []
     json.assets.forEach(asset => {
@@ -47,6 +47,7 @@ function on_phereo_json_received () {
 }
 
 function load_category(cat) {
+  document.getElementById("info_block").style.display = "none";
   category = cat;
   index_max = 0;
   current = 0;
@@ -145,6 +146,4 @@ window.addEventListener("DOMContentLoaded", e => {
   document.getElementById("cat_p").addEventListener("click", e => load_category("popular"));
   document.getElementById("cat_f").addEventListener("click", e => load_category("awards"));
   document.getElementById("cat_s").addEventListener("click", e => load_category("staffpicks"));
-
-  load_category("latestuploads");
 });
