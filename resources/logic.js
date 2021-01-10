@@ -46,7 +46,38 @@ function on_phereo_json_received () {
   }
 }
 
-function load_category(cat) {
+function on_phereo_json_userlist_received() {
+  if (thumbs && this.status == 200) {
+    if (index_max == 0) thumbs.innerText = '';
+    json = JSON.parse(this.responseText);
+    json.assets.forEach(asset => {
+      const img = document.createElement("img");
+      img.src = "/avatar/" + asset.id + ".jpg";
+      img.title = asset.username;
+      img["data-id"] = asset.id;
+      index_max += 1;
+      img.addEventListener("click", e => {
+        load_user(e.target["data-id"]);
+      });
+      thumbs.appendChild(img);
+    });
+    if (json.totalCount > index_max) {
+      const imgnext = document.createElement("img");
+      imgnext.src = "/next.webp";
+      imgnext.title = "Load next users";
+      imgnext.addEventListener("click", e => {
+        e.target.remove();
+        const req = new XMLHttpRequest();
+        req.addEventListener("load", on_phereo_json_userlist_received);
+        req.open("GET", "/api/" + category + "/" + index_max + ".json");
+        req.send();
+      });
+      thumbs.appendChild(imgnext);
+    }
+  }
+}
+
+function load_reset(cat) {
   document.getElementById("info_block").style.display = "none";
   category = cat;
   index_max = 0;
@@ -55,9 +86,24 @@ function load_category(cat) {
     thumbs.innerText = "";
   if (viewer)
     viewer.postMessage({'stereopix_action': 'list_clear'}, 'https://stereopix.net');
+}
+
+function load_category(cat) {
+  load_reset(cat);
   const req = new XMLHttpRequest();
   req.addEventListener("load", on_phereo_json_received);
   req.open("GET", "/api/" + cat + "/0.json");
+  req.send();
+}
+
+function load_search_user(username) {
+  const u = "username:" + encodeURIComponent(username);
+  load_reset(u);
+  if (thumbs)
+    thumbs.innerText = 'Searching users might be very slow...';
+  const req = new XMLHttpRequest();
+  req.addEventListener("load", on_phereo_json_userlist_received);
+  req.open("GET", "/api/" + u + "/0.json");
   req.send();
 }
 
@@ -155,6 +201,11 @@ window.addEventListener("DOMContentLoaded", e => {
   document.getElementById("search_form").addEventListener("submit", e => {
     e.preventDefault();
     load_category("search:" + encodeURIComponent(document.getElementById("search_input").value));
+    return false;
+  });
+  document.getElementById("searchuser_form").addEventListener("submit", e => {
+    e.preventDefault();
+    load_search_user(document.getElementById("searchuser_input").value);
     return false;
   });
 });
