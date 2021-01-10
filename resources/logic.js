@@ -1,5 +1,6 @@
 let thumbs = null;
 let viewer = null;
+let index_min = 0;
 let index_max = 0;
 let comments_opened = false;
 let current = 0;
@@ -8,6 +9,8 @@ let category = "latestuploads";
 if (window.location.protocol == "http:") window.location = "https://" + window.location.href.substr(7);
 
 function on_phereo_json_received () {
+  if (index_max == index_min) thumbs.innerText = '';
+  if (category.startsWith("username:")) return on_phereo_json_userlist_received.call(this);
   if (thumbs && this.status == 200) {
     json = JSON.parse(this.responseText);
     media = []
@@ -20,7 +23,7 @@ function on_phereo_json_received () {
       index_max += 1;
       img.addEventListener("click", e => {
         if (viewer) {
-          viewer.postMessage({'stereopix_action': 'goto', 'position': e.target['data-position']}, 'https://stereopix.net');
+          viewer.postMessage({'stereopix_action': 'goto', 'position': e.target['data-position'] - index_min}, 'https://stereopix.net');
           viewer.focus();
         }
         document.getElementById("stereopix_viewer").scrollIntoView();
@@ -43,12 +46,18 @@ function on_phereo_json_received () {
       });
       thumbs.appendChild(imgnext);
     }
+    if (json.totalCount > 25) {
+      const max = Math.ceil(json.totalCount/25);
+      document.getElementById("page_input").value = 1;
+      document.getElementById("page_input").max = max;
+      document.getElementById("pages_nb").innerText = max;
+      document.getElementById("pages_block").style.display = "inline-block";
+    }
   }
 }
 
 function on_phereo_json_userlist_received() {
   if (thumbs && this.status == 200) {
-    if (index_max == 0) thumbs.innerText = '';
     json = JSON.parse(this.responseText);
     json.assets.forEach(asset => {
       const img = document.createElement("img");
@@ -74,11 +83,19 @@ function on_phereo_json_userlist_received() {
       });
       thumbs.appendChild(imgnext);
     }
+    if (json.totalCount > 25) {
+      const max = Math.ceil(json.totalCount/25);
+      document.getElementById("page_input").value = 1;
+      document.getElementById("page_input").max = max;
+      document.getElementById("pages_nb").innerText = max;
+      document.getElementById("pages_block").style.display = "inline-block";
+    }
   }
 }
 
 function load_reset(cat) {
   document.getElementById("info_block").style.display = "none";
+  document.getElementById("pages_block").style.display = "none";
   category = cat;
   index_max = 0;
   current = 0;
@@ -88,23 +105,20 @@ function load_reset(cat) {
     viewer.postMessage({'stereopix_action': 'list_clear'}, 'https://stereopix.net');
 }
 
-function load_category(cat) {
+function load_category(cat, start) {
   load_reset(cat);
+  if (start) index_max = start;
+  index_min = index_max;
+  if (cat.startsWith("username:") && thumbs)
+    thumbs.innerText = 'Searching users might be very slow...';
   const req = new XMLHttpRequest();
   req.addEventListener("load", on_phereo_json_received);
-  req.open("GET", "/api/" + cat + "/0.json");
+  req.open("GET", "/api/" + cat + "/" + index_max + ".json");
   req.send();
 }
 
 function load_search_user(username) {
-  const u = "username:" + encodeURIComponent(username);
-  load_reset(u);
-  if (thumbs)
-    thumbs.innerText = 'Searching users might be very slow...';
-  const req = new XMLHttpRequest();
-  req.addEventListener("load", on_phereo_json_userlist_received);
-  req.open("GET", "/api/" + u + "/0.json");
-  req.send();
+  load_category("username:" + encodeURIComponent(username));
 }
 
 function load_user(uid) {
@@ -206,6 +220,11 @@ window.addEventListener("DOMContentLoaded", e => {
   document.getElementById("searchuser_form").addEventListener("submit", e => {
     e.preventDefault();
     load_search_user(document.getElementById("searchuser_input").value);
+    return false;
+  });
+  document.getElementById("pages_form").addEventListener('submit', e => {
+    e.preventDefault();
+    load_category(category, 25 * (document.getElementById("page_input").value - 1));
     return false;
   });
 });

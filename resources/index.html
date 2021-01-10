@@ -88,12 +88,13 @@
         padding-top: 10px;
         margin-top: 10px;
       }
-      #info_block, #search {
+      #info_block, #search, #pages_block {
         display: inline-block;
         padding: 15px;
         margin: 20px;
         background: white;
         border-radius: 20px;
+        vertical-align: middle;
       }
       input {
         min-width: 30em;
@@ -127,6 +128,10 @@
 
     <section id="thumbs">
     </section>
+
+    <nav id="pages_block" style="display: none;">
+      <p><form id="pages_form"><input type="number" id="page_input" placeholder="Page..." min="1" max="1" /> / <span id="pages_nb"></span> <input type="submit" value="Go" /></form></p>
+    </nav>
 
     <section id="search">
       <p><form id="tag_form"><input type="text" id="tag_input" placeholder="tag name" /> <input type="submit" value="Search by tag" /></form></p>
