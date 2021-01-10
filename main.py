@@ -89,6 +89,9 @@ async def http_api_tag_handler(request):
 async def http_api_search_handler(request):
   return await api_forward(request, 'search/?ss='+request.match_info['q']+'&userId=&userApi=&', request.match_info['offset'])
 
+async def http_api_username_handler(request):
+  return await api_forward(request, 'search_users/?ss='+request.match_info['q']+'&userId=&userApi=&', request.match_info['offset'])
+
 @web.middleware
 async def error_middleware(request, handler):
     try:
@@ -108,6 +111,7 @@ async def start_server(host, port):
       web.get('/api/user:{uid:[a-f0-9]{24}}/{offset:\d+}.json', http_api_user_handler),
       web.get('/api/tag:{tag}/{offset:\d+}.json', http_api_tag_handler),
       web.get('/api/search:{q}/{offset:\d+}.json', http_api_search_handler),
+      web.get('/api/username:{q}/{offset:\d+}.json', http_api_username_handler),
       web.static('/', 'resources'),
     ])
     app.middlewares.append(error_middleware)
