@@ -88,6 +88,19 @@
         padding-top: 10px;
         margin-top: 10px;
       }
+      #info_block, #search {
+        display: inline-block;
+        padding: 15px;
+        margin: 20px;
+        background: white;
+        border-radius: 20px;
+      }
+      input {
+        min-width: 30em;
+      }
+      input[type=submit] {
+        min-width: 15em;
+      }
     </style>
 	</head>
 	<body>
@@ -113,6 +126,11 @@
     </div>
 
     <section id="thumbs">
+    </section>
+
+    <section id="search">
+      <p><form id="tag_form"><input type="text" id="tag_input" placeholder="tag name" /> <input type="submit" value="Search by tag" /></form></p>
+      <p><form id="search_form"><input type="text" id="search_input" placeholder="search..." /> <input type="submit" value="Search" /></form></p>
     </section>
 	</body>
 </html>

@@ -146,4 +146,15 @@ window.addEventListener("DOMContentLoaded", e => {
   document.getElementById("cat_p").addEventListener("click", e => load_category("popular"));
   document.getElementById("cat_f").addEventListener("click", e => load_category("awards"));
   document.getElementById("cat_s").addEventListener("click", e => load_category("staffpicks"));
+
+  document.getElementById("tag_form").addEventListener("submit", e => {
+    e.preventDefault();
+    load_category("tag:" + encodeURIComponent(document.getElementById("tag_input").value));
+    return false;
+  });
+  document.getElementById("search_form").addEventListener("submit", e => {
+    e.preventDefault();
+    load_category("search:" + encodeURIComponent(document.getElementById("search_input").value));
+    return false;
+  });
 });
