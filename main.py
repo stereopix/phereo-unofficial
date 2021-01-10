@@ -80,6 +80,9 @@ async def api_forward(request, cat, offset):
 async def http_api_category_handler(request):
   return await api_forward(request, request.match_info['category']+'?', request.match_info['offset'])  
 
+async def http_api_user_handler(request):
+  return await api_forward(request, 'images/?user='+request.match_info['uid']+'&userId=&userApi=&', request.match_info['offset'])
+
 @web.middleware
 async def error_middleware(request, handler):
     try:
@@ -96,6 +99,7 @@ async def start_server(host, port):
       web.get('/avatar/{img:[a-f0-9]{24}}.jpg', http_avatar_handler),
       web.get('/comments/{img:[a-f0-9]{24}}.json', http_comments_handler),
       web.get('/api/{category:(latestuploads|awards|staffpicks|popular)}/{offset:\d+}.json', http_api_category_handler),
+      web.get('/api/user:{uid:[a-f0-9]{24}}/{offset:\d+}.json', http_api_user_handler),
       web.static('/', 'resources'),
     ])
     app.middlewares.append(error_middleware)
