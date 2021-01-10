@@ -59,7 +59,11 @@ function load_category(cat) {
   req.open("GET", "/api/" + cat + "/0.json");
   req.send();
 }
-          
+
+function load_user(uid) {
+  load_category("user:" + uid);
+}
+
 function format_date(v) {
   d = new Date(v*1000);
   function pad(i) { return ((i < 10) ? "0" : "") + i; }
@@ -92,6 +96,7 @@ window.addEventListener('message', function(e) {
           document.getElementById("info_date").innerText = format_date(json.created);
           document.getElementById("info_user").innerText = json.user.name;
           document.getElementById("info_avatar").src = "/avatar/" + json.user.id + ".jpg";
+          document.getElementById("info_avatar").onclick = e => { load_user(json.user.id); };
           if (json.comments > 0) {
             document.getElementById("info_block").addEventListener("click", e => {
               const req = new XMLHttpRequest();
@@ -102,6 +107,7 @@ window.addEventListener('message', function(e) {
                   extdiv.classList.add("comment");
                   const comimg = document.createElement("img");
                   comimg.src = "/avatar/" + com.user.id + ".jpg";
+                  comimg.onclick = e => { load_user(com.user.id); };
                   const intdiv = document.createElement("div");
                   intdiv.classList.add("col2");
                   extdiv.appendChild(comimg);
