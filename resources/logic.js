@@ -11,6 +11,7 @@ if (window.location.protocol == "http:") window.location = "https://" + window.l
 
 function on_phereo_json_received () {
   xhr = null;
+  document.getElementById("spinner").style.display = "none";
   if (index_max == index_min) thumbs.innerText = '';
   if (category.startsWith("username:")) return on_phereo_json_userlist_received.call(this);
   if (thumbs && this.status == 200) {
@@ -110,6 +111,7 @@ function load_page(cat, start, keep) {
   xhr.addEventListener("load", on_phereo_json_received);
   xhr.open("GET", "/api/" + cat + "/" + index_max + ".json");
   xhr.send();
+  document.getElementById("spinner").style.display = "block";
 }
 
 function format_date(v) {
@@ -151,6 +153,7 @@ window.addEventListener('message', function(e) {
               if (xhr) xhr.abort();
               xhr = new XMLHttpRequest();
               const on_com_loaded = e => {
+                document.getElementById("spinner").style.display = "none";
                 comjson = JSON.parse(xhr.responseText);
                 xhr = null;
                 comjson.data.forEach(com => {
@@ -178,6 +181,7 @@ window.addEventListener('message', function(e) {
               xhr.addEventListener("load", on_com_loaded);
               xhr.open("GET", "/comments/" + json.id + ".json");
               xhr.send();
+              document.getElementById("spinner").style.display = "block";
               comments_opened = true;
             });
           }
