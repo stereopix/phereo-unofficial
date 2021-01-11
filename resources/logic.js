@@ -148,6 +148,19 @@ window.addEventListener('message', function(e) {
           document.getElementById("info_user").innerText = json.user.name;
           document.getElementById("info_avatar").src = "/avatar/" + json.user.id + ".jpg";
           document.getElementById("info_avatar").onclick = e => { load_page("user:" + json.user.id); };
+          const info_tags = document.getElementById("info_tags");
+          info_tags.innerText = json.tags == "" ? "" : "Tags: ";
+          json.tags.split(",").forEach(t => {
+            const a = document.createElement("a");
+            a.onclick = e => {
+              e.stopPropagation();
+              load_page("tag:" + encodeURIComponent(t))
+            };
+            a.innerText = t;
+            info_tags.appendChild(a);
+            info_tags.appendChild(document.createTextNode(", "));
+          });
+          info_tags.lastChild.remove();
         }
       }
       current = e.data.position;
