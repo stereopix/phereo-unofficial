@@ -163,6 +163,19 @@ window.addEventListener('message', function(e) {
             info_tags.appendChild(document.createTextNode(", "));
           });
           info_tags.lastChild.remove();
+          const info_albums = document.getElementById("info_albums");
+          info_albums.innerText = json.albums.length == 0 ? "" : json.tags == "" ? "Albums: " : " ⋅ Albums: ";
+          json.albums.forEach(album => {
+            const a = document.createElement("a");
+            a.onclick = e => {
+              e.stopPropagation();
+              load_page("album:" + album.id)
+            };
+            a.innerText = album.title;
+            info_albums.appendChild(a);
+            info_albums.appendChild(document.createTextNode(", "));
+          });
+          if (json.albums.length > 0) info_albums.lastChild.remove();
         }
       }
       current = e.data.position;
