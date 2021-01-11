@@ -5,10 +5,12 @@ let index_max = 0;
 let comments_opened = false;
 let current = 0;
 let category = "latestuploads";
+let xhr = null;
 
 if (window.location.protocol == "http:") window.location = "https://" + window.location.href.substr(7);
 
 function on_phereo_json_received () {
+  xhr = null;
   if (index_max == index_min) thumbs.innerText = '';
   if (category.startsWith("username:")) return on_phereo_json_userlist_received.call(this);
   if (thumbs && this.status == 200) {
@@ -88,6 +90,7 @@ function on_phereo_json_userlist_received() {
 }
 
 function load_page(cat, start, keep) {
+  if (xhr) xhr.abort();
   if (!start) start = 0;
   if (!keep) {
     document.getElementById("info_block").style.display = "none";
@@ -103,10 +106,10 @@ function load_page(cat, start, keep) {
   }
   if (cat.startsWith("username:") && thumbs)
     thumbs.innerText = 'Searching users might be very slow...';
-  const req = new XMLHttpRequest();
-  req.addEventListener("load", on_phereo_json_received);
-  req.open("GET", "/api/" + cat + "/" + index_max + ".json");
-  req.send();
+  xhr = new XMLHttpRequest();
+  xhr.addEventListener("load", on_phereo_json_received);
+  xhr.open("GET", "/api/" + cat + "/" + index_max + ".json");
+  xhr.send();
 }
 
 function format_date(v) {
@@ -144,9 +147,12 @@ window.addEventListener('message', function(e) {
           document.getElementById("info_avatar").onclick = e => { load_page("user:" + json.user.id); };
           if (json.comments > 0) {
             document.getElementById("info_block").addEventListener("click", e => {
-              const req = new XMLHttpRequest();
+              if (comments_opened) return;
+              if (xhr) xhr.abort();
+              xhr = new XMLHttpRequest();
               const on_com_loaded = e => {
-                comjson = JSON.parse(req.responseText);
+                comjson = JSON.parse(xhr.responseText);
+                xhr = null;
                 comjson.data.forEach(com => {
                   const extdiv = document.createElement("div");
                   extdiv.classList.add("comment");
@@ -168,11 +174,10 @@ window.addEventListener('message', function(e) {
                   intdiv.appendChild(p2);
                   document.getElementById("comments").appendChild(extdiv);
                 });
-                req.removeEventListener("load", on_com_loaded);
               };
-              req.addEventListener("load", on_com_loaded);
-              req.open("GET", "/comments/" + json.id + ".json");
-              if (!comments_opened) req.send();
+              xhr.addEventListener("load", on_com_loaded);
+              xhr.open("GET", "/comments/" + json.id + ".json");
+              xhr.send();
               comments_opened = true;
             });
           }
