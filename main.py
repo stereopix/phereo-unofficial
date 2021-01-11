@@ -83,6 +83,9 @@ async def http_api_category_handler(request):
 async def http_api_user_handler(request):
   return await api_forward(request, 'images/?user='+request.match_info['uid']+'&userId=&userApi=&', request.match_info['offset'])
 
+async def http_api_album_handler(request):
+  return await api_forward(request, 'images/?albumId='+request.match_info['aid']+'&userId=&userApi=&', request.match_info['offset'])
+
 async def http_api_tag_handler(request):
   return await api_forward(request, 'search_tags/?ss='+request.match_info['tag']+'&userId=&userApi=&', request.match_info['offset'])
 
@@ -109,6 +112,7 @@ async def start_server(host, port):
       web.get('/comments/{img:[a-f0-9]{24}}.json', http_comments_handler),
       web.get('/api/{category:(latestuploads|awards|staffpicks|popular)}/{offset:\d+}.json', http_api_category_handler),
       web.get('/api/user:{uid:[a-f0-9]{24}}/{offset:\d+}.json', http_api_user_handler),
+      web.get('/api/album:{aid:[a-f0-9]{24}}/{offset:\d+}.json', http_api_album_handler),
       web.get('/api/tag:{tag}/{offset:\d+}.json', http_api_tag_handler),
       web.get('/api/search:{q}/{offset:\d+}.json', http_api_search_handler),
       web.get('/api/username:{q}/{offset:\d+}.json', http_api_username_handler),
