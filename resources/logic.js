@@ -138,6 +138,7 @@ window.addEventListener('message', function(e) {
           tn.classList.add("active");
           json = JSON.parse(tn["data-info"]);
           document.getElementById("info_block").style.display = "inline-grid";
+          document.getElementById("info_block")["data-id"] = json.comments > 0 ? json.id : undefined;
           document.getElementById("info_title").innerText = json.title;
           document.getElementById("info_desc").innerText = json.description;
           document.getElementById("info_views").innerText = json.views;
@@ -147,44 +148,6 @@ window.addEventListener('message', function(e) {
           document.getElementById("info_user").innerText = json.user.name;
           document.getElementById("info_avatar").src = "/avatar/" + json.user.id + ".jpg";
           document.getElementById("info_avatar").onclick = e => { load_page("user:" + json.user.id); };
-          if (json.comments > 0) {
-            document.getElementById("info_block").addEventListener("click", e => {
-              if (comments_opened) return;
-              if (xhr) xhr.abort();
-              xhr = new XMLHttpRequest();
-              const on_com_loaded = e => {
-                document.getElementById("spinner").style.display = "none";
-                comjson = JSON.parse(xhr.responseText);
-                xhr = null;
-                comjson.data.forEach(com => {
-                  const extdiv = document.createElement("div");
-                  extdiv.classList.add("comment");
-                  const comimg = document.createElement("img");
-                  comimg.src = "/avatar/" + com.user.id + ".jpg";
-                  comimg.onclick = e => { load_page("user:" + com.user.id); };
-                  const intdiv = document.createElement("div");
-                  intdiv.classList.add("col2");
-                  extdiv.appendChild(comimg);
-                  extdiv.appendChild(intdiv);
-                  const p1 = document.createElement("p");
-                  p1.innerText = " " + format_date(com.created);
-                  const b = document.createElement("b");
-                  b.innerText = com.user.name;
-                  p1.insertBefore(b, p1.firstChild);
-                  const p2 = document.createElement("p");
-                  p2.innerText = com.body;
-                  intdiv.appendChild(p1);
-                  intdiv.appendChild(p2);
-                  document.getElementById("comments").appendChild(extdiv);
-                });
-              };
-              xhr.addEventListener("load", on_com_loaded);
-              xhr.open("GET", "/comments/" + json.id + ".json");
-              xhr.send();
-              document.getElementById("spinner").style.display = "block";
-              comments_opened = true;
-            });
-          }
         }
       }
       current = e.data.position;
@@ -219,5 +182,42 @@ window.addEventListener("DOMContentLoaded", e => {
     e.preventDefault();
     load_page(category, 25 * (document.getElementById("page_input").value - 1));
     return false;
+  });
+  document.getElementById("info_block").addEventListener("click", e => {
+    const id = document.getElementById("info_block")["data-id"];
+    if (comments_opened || !id) return;
+    if (xhr) xhr.abort();
+    xhr = new XMLHttpRequest();
+    const on_com_loaded = e => {
+      document.getElementById("spinner").style.display = "none";
+      comjson = JSON.parse(xhr.responseText);
+      xhr = null;
+      comjson.data.forEach(com => {
+        const extdiv = document.createElement("div");
+        extdiv.classList.add("comment");
+        const comimg = document.createElement("img");
+        comimg.src = "/avatar/" + com.user.id + ".jpg";
+        comimg.onclick = e => { load_page("user:" + com.user.id); };
+        const intdiv = document.createElement("div");
+        intdiv.classList.add("col2");
+        extdiv.appendChild(comimg);
+        extdiv.appendChild(intdiv);
+        const p1 = document.createElement("p");
+        p1.innerText = " " + format_date(com.created);
+        const b = document.createElement("b");
+        b.innerText = com.user.name;
+        p1.insertBefore(b, p1.firstChild);
+        const p2 = document.createElement("p");
+        p2.innerText = com.body;
+        intdiv.appendChild(p1);
+        intdiv.appendChild(p2);
+        document.getElementById("comments").appendChild(extdiv);
+      });
+    };
+    xhr.addEventListener("load", on_com_loaded);
+    xhr.open("GET", "/comments/" + id + ".json");
+    xhr.send();
+    document.getElementById("spinner").style.display = "block";
+    comments_opened = true;
   });
 });
