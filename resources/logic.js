@@ -181,7 +181,7 @@ window.addEventListener('message', function(e) {
           }
           info_avatar.src = "/avatar/" + json.user.id + ".jpg";
           info_avatar.title = json.user.name;
-          info_avatar.onclick = e => { load_page("user:" + json.user.id); };
+          info_avatar.onclick = e => { e.stopPropagation(); load_page("user:" + json.user.id); };
           const info_tags = document.getElementById("info_tags");
           info_tags.innerText = json.tags == "" ? "" : "Tags: ";
           json.tags.split(",").forEach(t => {
