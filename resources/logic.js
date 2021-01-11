@@ -127,7 +127,8 @@ window.addEventListener('message', function(e) {
       viewer.focus();
 
     } else if (e.data.type == 'mediumChanged') {
-      document.getElementById("info_avatar").src = "data:,";
+      const info_avatar = document.getElementById("info_avatar");
+      info_avatar.src = "data:,";
       document.getElementById("comments").innerText = "";
       comments_opened = false;
       if (thumbs) {
@@ -146,8 +147,9 @@ window.addEventListener('message', function(e) {
           document.getElementById("info_comments").innerText = json.comments;
           document.getElementById("info_date").innerText = format_date(json.created);
           document.getElementById("info_user").innerText = json.user.name;
-          document.getElementById("info_avatar").src = "/avatar/" + json.user.id + ".jpg";
-          document.getElementById("info_avatar").onclick = e => { load_page("user:" + json.user.id); };
+          info_avatar.src = "/avatar/" + json.user.id + ".jpg";
+          info_avatar.title = json.user.name;
+          info_avatar.onclick = e => { load_page("user:" + json.user.id); };
           const info_tags = document.getElementById("info_tags");
           info_tags.innerText = json.tags == "" ? "" : "Tags: ";
           json.tags.split(",").forEach(t => {
@@ -210,6 +212,7 @@ window.addEventListener("DOMContentLoaded", e => {
         extdiv.classList.add("comment");
         const comimg = document.createElement("img");
         comimg.src = "/avatar/" + com.user.id + ".jpg";
+        comimg.title = com.user.name;
         comimg.onclick = e => { load_page("user:" + com.user.id); };
         const intdiv = document.createElement("div");
         intdiv.classList.add("col2");
