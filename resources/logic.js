@@ -147,6 +147,38 @@ window.addEventListener('message', function(e) {
           document.getElementById("info_comments").innerText = json.comments;
           document.getElementById("info_date").innerText = format_date(json.created);
           document.getElementById("info_user").innerText = json.user.name;
+          const info_stars = document.getElementById("info_stars");
+          info_stars.innerText = "";
+          if (json.popular) {
+            info_stars.appendChild(document.createTextNode(" ⋅ "))
+            const a = document.createElement("a");
+            a.onclick = e => {
+              e.stopPropagation();
+              load_page("popular")
+            };
+            a.innerText = "Popular";
+            info_stars.appendChild(a);
+          }
+          if (json.featured) {
+            info_stars.appendChild(document.createTextNode(" ⋅ "))
+            const a = document.createElement("a");
+            a.onclick = e => {
+              e.stopPropagation();
+              load_page("awards")
+            };
+            a.innerText = "Featured";
+            info_stars.appendChild(a);
+          }
+          if (json.staff) {
+            info_stars.appendChild(document.createTextNode(" ⋅ "))
+            const a = document.createElement("a");
+            a.onclick = e => {
+              e.stopPropagation();
+              load_page("staffpicks")
+            };
+            a.innerText = "Staff picks";
+            info_stars.appendChild(a);
+          }
           info_avatar.src = "/avatar/" + json.user.id + ".jpg";
           info_avatar.title = json.user.name;
           info_avatar.onclick = e => { load_page("user:" + json.user.id); };
