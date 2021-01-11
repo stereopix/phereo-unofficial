@@ -39,10 +39,7 @@ function on_phereo_json_received () {
       imgnext.title = "Load next images";
       imgnext.addEventListener("click", e => {
         e.target.remove();
-        const req = new XMLHttpRequest();
-        req.addEventListener("load", on_phereo_json_received);
-        req.open("GET", "/api/" + category + "/" + index_max + ".json");
-        req.send();
+        load_page(category, index_max, true);
       });
       thumbs.appendChild(imgnext);
     }
@@ -66,7 +63,7 @@ function on_phereo_json_userlist_received() {
       img["data-id"] = asset.id;
       index_max += 1;
       img.addEventListener("click", e => {
-        load_user(e.target["data-id"]);
+        load_page("user:" + e.target["data-id"]);
       });
       thumbs.appendChild(img);
     });
@@ -76,10 +73,7 @@ function on_phereo_json_userlist_received() {
       imgnext.title = "Load next users";
       imgnext.addEventListener("click", e => {
         e.target.remove();
-        const req = new XMLHttpRequest();
-        req.addEventListener("load", on_phereo_json_userlist_received);
-        req.open("GET", "/api/" + category + "/" + index_max + ".json");
-        req.send();
+        load_page(category, index_max, true);
       });
       thumbs.appendChild(imgnext);
     }
@@ -93,36 +87,26 @@ function on_phereo_json_userlist_received() {
   }
 }
 
-function load_reset(cat) {
-  document.getElementById("info_block").style.display = "none";
-  document.getElementById("pages_block").style.display = "none";
-  category = cat;
-  index_max = 0;
-  current = 0;
-  if (thumbs)
-    thumbs.innerText = "";
-  if (viewer)
-    viewer.postMessage({'stereopix_action': 'list_clear'}, 'https://stereopix.net');
-}
-
-function load_category(cat, start) {
-  load_reset(cat);
-  if (start) index_max = start;
-  index_min = index_max;
+function load_page(cat, start, keep) {
+  if (!start) start = 0;
+  if (!keep) {
+    document.getElementById("info_block").style.display = "none";
+    document.getElementById("pages_block").style.display = "none";
+    category = cat;
+    index_max = start;
+    index_min = index_max;
+    current = 0;
+    if (thumbs)
+      thumbs.innerText = "";
+    if (viewer)
+      viewer.postMessage({'stereopix_action': 'list_clear'}, 'https://stereopix.net');
+  }
   if (cat.startsWith("username:") && thumbs)
     thumbs.innerText = 'Searching users might be very slow...';
   const req = new XMLHttpRequest();
   req.addEventListener("load", on_phereo_json_received);
   req.open("GET", "/api/" + cat + "/" + index_max + ".json");
   req.send();
-}
-
-function load_search_user(username) {
-  load_category("username:" + encodeURIComponent(username));
-}
-
-function load_user(uid) {
-  load_category("user:" + uid);
 }
 
 function format_date(v) {
@@ -157,7 +141,7 @@ window.addEventListener('message', function(e) {
           document.getElementById("info_date").innerText = format_date(json.created);
           document.getElementById("info_user").innerText = json.user.name;
           document.getElementById("info_avatar").src = "/avatar/" + json.user.id + ".jpg";
-          document.getElementById("info_avatar").onclick = e => { load_user(json.user.id); };
+          document.getElementById("info_avatar").onclick = e => { load_page("user:" + json.user.id); };
           if (json.comments > 0) {
             document.getElementById("info_block").addEventListener("click", e => {
               const req = new XMLHttpRequest();
@@ -168,7 +152,7 @@ window.addEventListener('message', function(e) {
                   extdiv.classList.add("comment");
                   const comimg = document.createElement("img");
                   comimg.src = "/avatar/" + com.user.id + ".jpg";
-                  comimg.onclick = e => { load_user(com.user.id); };
+                  comimg.onclick = e => { load_page("user:" + com.user.id); };
                   const intdiv = document.createElement("div");
                   intdiv.classList.add("col2");
                   extdiv.appendChild(comimg);
@@ -202,29 +186,29 @@ window.addEventListener('message', function(e) {
 window.addEventListener("DOMContentLoaded", e => {
   thumbs = document.getElementById("thumbs");
 
-  document.getElementById("cat_l").addEventListener("click", e => load_category("latestuploads"));
-  document.getElementById("cat_p").addEventListener("click", e => load_category("popular"));
-  document.getElementById("cat_f").addEventListener("click", e => load_category("awards"));
-  document.getElementById("cat_s").addEventListener("click", e => load_category("staffpicks"));
+  document.getElementById("cat_l").addEventListener("click", e => load_page("latestuploads"));
+  document.getElementById("cat_p").addEventListener("click", e => load_page("popular"));
+  document.getElementById("cat_f").addEventListener("click", e => load_page("awards"));
+  document.getElementById("cat_s").addEventListener("click", e => load_page("staffpicks"));
 
   document.getElementById("tag_form").addEventListener("submit", e => {
     e.preventDefault();
-    load_category("tag:" + encodeURIComponent(document.getElementById("tag_input").value));
+    load_page("tag:" + encodeURIComponent(document.getElementById("tag_input").value));
     return false;
   });
   document.getElementById("search_form").addEventListener("submit", e => {
     e.preventDefault();
-    load_category("search:" + encodeURIComponent(document.getElementById("search_input").value));
+    load_page("search:" + encodeURIComponent(document.getElementById("search_input").value));
     return false;
   });
   document.getElementById("searchuser_form").addEventListener("submit", e => {
     e.preventDefault();
-    load_search_user(document.getElementById("searchuser_input").value);
+    load_page("username:" + document.getElementById("searchuser_input").value);
     return false;
   });
   document.getElementById("pages_form").addEventListener('submit', e => {
     e.preventDefault();
-    load_category(category, 25 * (document.getElementById("page_input").value - 1));
+    load_page(category, 25 * (document.getElementById("page_input").value - 1));
     return false;
   });
 });
