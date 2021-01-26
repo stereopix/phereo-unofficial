@@ -95,6 +95,7 @@ function load_page(cat, start, keep) {
   if (!start) start = 0;
   if (!keep) {
     window.history.replaceState({"cat": cat}, document.title, "?"+cat);
+    document.getElementById("curcat").textContent = cat;
     document.getElementById("info_block").style.display = "none";
     document.getElementById("pages_block").style.display = "none";
     category = cat;
