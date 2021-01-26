@@ -94,6 +94,7 @@ function load_page(cat, start, keep) {
   if (xhr) xhr.abort();
   if (!start) start = 0;
   if (!keep) {
+    window.history.replaceState({"cat": cat}, document.title, "?"+cat);
     document.getElementById("info_block").style.display = "none";
     document.getElementById("pages_block").style.display = "none";
     category = cat;
@@ -281,4 +282,7 @@ window.addEventListener("DOMContentLoaded", e => {
     document.getElementById("spinner").style.display = "block";
     comments_opened = true;
   });
+  const autocat = window.location.search.substr(1);
+  if (["popular", "awards", "staffpicks", "latestuploads", "user", "tag", "album", "search", "username"].indexOf(autocat.split(":")[0]) > -1)
+	load_page(autocat);
 });
