@@ -92,7 +92,8 @@ function on_phereo_json_userlist_received() {
 
 function load_page(cat, start, keep) {
   if (xhr) xhr.abort();
-  if (!start) start = 0;
+  start += 0;
+  if (!start || start < 0) start = 0;
   if (!keep) {
     window.history.replaceState({"cat": cat, "page": start}, document.title, "?"+cat+(start > 0 ? "#"+Math.floor(1+start/25) : ""));
     document.getElementById("curcat").textContent = cat;
