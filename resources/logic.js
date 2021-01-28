@@ -94,7 +94,7 @@ function load_page(cat, start, keep) {
   if (xhr) xhr.abort();
   if (!start) start = 0;
   if (!keep) {
-    window.history.replaceState({"cat": cat}, document.title, "?"+cat);
+    window.history.replaceState({"cat": cat, "page": start}, document.title, "?"+cat+(start > 0 ? "#"+Math.floor(1+start/25) : ""));
     document.getElementById("curcat").textContent = cat;
     document.getElementById("info_block").style.display = "none";
     document.getElementById("pages_block").style.display = "none";
@@ -284,6 +284,7 @@ window.addEventListener("DOMContentLoaded", e => {
     comments_opened = true;
   });
   const autocat = window.location.search.substr(1);
+  const autopage = window.location.hash.substr(1) || 1;
   if (["popular", "awards", "staffpicks", "latestuploads", "user", "tag", "album", "search", "username"].indexOf(autocat.split(":")[0]) > -1)
-	load_page(autocat);
+	load_page(autocat, 25*(autopage-1));
 });
