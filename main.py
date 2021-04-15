@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-from aiohttp import web, client
+from aiohttp import web, ClientSession
 import asyncio
 
 async def http_root_handler(request):
@@ -14,30 +14,32 @@ async def forward(request, url):
   for k in ('Cache-Control', 'If-Modified-Since', 'If-None-Match', 'User-Agent'):
     if k in request.headers:
       headers[k] = request.headers[k]
-  async with client.request(
-      'GET',
-      url,
-      headers = headers,
-      allow_redirects = False,
-      data = await request.read()
-  ) as res:
-    if res.status == 404:
-      raise web.HTTPNotFound()
-    elif res.status == 302:
-      raise web.HTTPFound(location=res.headers.get('Location'))
-    elif res.status == 304:
-      raise web.HTTPNotModified()
-    elif res.status != 200:
-      raise web.HTTPInternalServerError() # Not expected
-    headers = {'Access-Control-Allow-Origin': '*'}
-    for k in ('Content-Type', 'Expires', 'Cache-Control', 'Pragma', 'ETag', 'Last-Modified'):
-      if k in res.headers:
-        headers[k] = res.headers[k]
-    return web.Response(
-      status = 200,
-      headers = headers,
-      body = await res.read()
-    )
+  async with ClientSession() as client:
+      async with client.request(
+          'GET',
+          url,
+          headers = headers,
+          allow_redirects = False,
+          ssl = False,
+          data = await request.read()
+      ) as res:
+        if res.status == 404:
+          raise web.HTTPNotFound()
+        elif res.status == 302:
+          raise web.HTTPFound(location=res.headers.get('Location'))
+        elif res.status == 304:
+          raise web.HTTPNotModified()
+        elif res.status != 200:
+          raise web.HTTPInternalServerError() # Not expected
+        headers = {'Access-Control-Allow-Origin': '*'}
+        for k in ('Content-Type', 'Expires', 'Cache-Control', 'Pragma', 'ETag', 'Last-Modified'):
+          if k in res.headers:
+            headers[k] = res.headers[k]
+        return web.Response(
+          status = 200,
+          headers = headers,
+          body = await res.read()
+        )
 
 async def http_img_handler(request):
   try:
