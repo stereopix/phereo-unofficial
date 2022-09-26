@@ -74,10 +74,10 @@ async def http_avatar_handler(request):
     raise web.HTTPFound(location=e.location.replace('http://', 'https://'))
 
 async def http_comments_handler(request):
-  return await forward(request, 'http://api.phereo.com/images/'+request.match_info['img']+'/comments?offset=0&count=100')
+  return await forward(request, 'https://api.phereo.com/images/'+request.match_info['img']+'/comments?offset=0&count=100')
 
 async def api_forward(request, cat, offset):
-  return await forward(request, 'http://api.phereo.com/api/open/'+cat+'offset='+offset+'&count=25&adultFilter=2')
+  return await forward(request, 'https://api.phereo.com/api/open/'+cat+'offset='+offset+'&count=25&adultFilter=2')
 
 async def http_api_category_handler(request):
   return await api_forward(request, request.match_info['category']+'?', request.match_info['offset'])  
