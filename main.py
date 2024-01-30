@@ -4,6 +4,8 @@ import sys
 from aiohttp import web, ClientSession
 import asyncio
 
+proxyfy_imgs = False
+
 async def http_root_handler(request):
     with open('resources/index.html') as f:
         return web.Response(text=f.read(), content_type='text/html')
@@ -42,34 +44,34 @@ async def forward(request, url):
         )
 
 async def http_img_handler(request):
+  url = 'https://api.phereo.com/imagestore2/' + request.match_info['img'] + '/sidebyside/l/'
+  if not proxyfy_imgs: raise web.HTTPFound(url, headers={'Access-Control-Allow-Origin': '*'})
   try:
-    ret = await forward(request, 'https://api.phereo.com/imagestore2/'+request.match_info['img']+'/sidebyside/l/')
+    ret = await forward(request, url)
   except web.HTTPNotFound:
-    try:
-      ret = await forward(request, 'https://api.phereo.com/imagestore/'+request.match_info['img']+'/sidebyside/l/')
-    except web.HTTPNotFound:
-      with open('resources/img_404.webp', 'rb') as f:
-        ret = web.StreamResponse(headers={'Access-Control-Allow-Origin': '*', 'Content-Type': 'image/webp'})
-        await ret.prepare(request)
-        await ret.write(f.read())
+    with open('resources/img_404.webp', 'rb') as f:
+      ret = web.StreamResponse(headers={'Access-Control-Allow-Origin': '*', 'Content-Type': 'image/webp'})
+      await ret.prepare(request)
+      await ret.write(f.read())
   return ret
 
 async def http_thumb_handler(request):
+  url = 'https://api.phereo.com/imagestore/' + request.match_info['img'] + '/thumb.square/280/'
+  if not proxyfy_imgs: raise web.HTTPFound(url, headers={'Access-Control-Allow-Origin': '*'})
   try:
-    ret = await forward(request, 'https://api.phereo.com/imagestore/'+request.match_info['img']+'/thumb.square/280/')
+    ret = await forward(request, url)
   except web.HTTPNotFound:
-    try:
-      ret = await forward(request, 'https://api.phereo.com/imagestore2/'+request.match_info['img']+'/thumb.square/280/')
-    except web.HTTPNotFound:
-      with open('resources/thumb_404.webp', 'rb') as f:
-        ret = web.StreamResponse(headers={'Access-Control-Allow-Origin': '*', 'Content-Type': 'image/webp'})
-        await ret.prepare(request)
-        await ret.write(f.read())
+    with open('resources/thumb_404.webp', 'rb') as f:
+      ret = web.StreamResponse(headers={'Access-Control-Allow-Origin': '*', 'Content-Type': 'image/webp'})
+      await ret.prepare(request)
+      await ret.write(f.read())
   return ret
 
 async def http_avatar_handler(request):
+  url = 'https://api.phereo.com/avatar/' + request.match_info['img'] + '/100.100'
+  if not proxyfy_imgs: raise web.HTTPFound(url, headers={'Access-Control-Allow-Origin': '*'})
   try:
-    return await forward(request, 'https://api.phereo.com/avatar/'+request.match_info['img']+'/100.100')
+    return await forward(request, url)
   except web.HTTPFound as e:
     raise web.HTTPFound(location=e.location.replace('http://', 'https://'))
 
